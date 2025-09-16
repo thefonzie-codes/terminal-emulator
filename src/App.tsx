@@ -5,20 +5,24 @@ type CommandLine = {
   prompt: string;
   input: string;
   output: string;
+  isCurrent: boolean;
+  setInput?: React.Dispatch<React.SetStateAction<string>>;
 }
 
 function CommandLine(props: {
   prompt: string;
   input: string;
+  setInput?: React.Dispatch<React.SetStateAction<string>>;
   output: string;
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   isCurrent: boolean;
 }) {
 
-  const { prompt, input, output, handleKeyDown, isCurrent } = props;
-  const [currentInput, setCurrentInput] = useState(input);
+  const { prompt, input, setInput, output, handleKeyDown, isCurrent } = props;
 
-  if (isCurrent) {
+  console.log(input + "," + isCurrent);
+
+  if (isCurrent === true) {
     return (
       <div className="command-line-container">
         <div className="command-line-input">
@@ -26,9 +30,9 @@ function CommandLine(props: {
           <div className="input">
           <input
             type="text"        
-            value={currentInput}
+            value={input}
             autoFocus
-            onChange={(e) => setCurrentInput(e.target.value)}
+            onChange={(e) => setInput?.(e.target.value)}
             onKeyDown={handleKeyDown}
           />
         </div>
@@ -52,7 +56,7 @@ function CommandLineHistory(commandLineList: CommandLine[], handleKeyDown: (e: R
     return <></>;
   }
   return commandLineList.map((commandLine: CommandLine) => {
-    const {prompt, input, output} = commandLine;
+    const {prompt, input, output, setInput} = commandLine;
     const index = commandLineList.indexOf(commandLine);
     return (
     <CommandLine 
@@ -62,6 +66,7 @@ function CommandLineHistory(commandLineList: CommandLine[], handleKeyDown: (e: R
       output={output} 
       isCurrent={false}
       handleKeyDown={handleKeyDown} 
+      setInput={setInput}
     />
     )
   });
@@ -91,15 +96,15 @@ function Home() {
       const newInput = target.value;
       const newOutput = getCommand(newInput);
 
-      setCommandLineList(prev => [...prev, { prompt, input: newInput, output: newOutput }]);
       setInput("");
       setOutput("");
+      setCommandLineList(prev => [...prev, { prompt, input: newInput, output: newOutput, isCurrent: false }]);
     } };
     
   return (
     <div className="terminal">
       {CommandLineHistory(commandLineList, handleKeyDown)}
-      {CommandLine({prompt, input, output, handleKeyDown, isCurrent: true})}
+      {CommandLine({prompt, input, setInput: setInput, output, handleKeyDown, isCurrent: true})}
     </div>
   );
 }
